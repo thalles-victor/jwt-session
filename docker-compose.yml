@@ -1,0 +1,27 @@
+services:
+  postgres:
+    container_name: jwt-sessions-postgres
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: jwt_sessions_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - jwt_network
+
+  redis:
+    container_name: jwt-sessions-redis
+    image: redis:7
+    restart: always
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    networks:
+      - jwt_network
