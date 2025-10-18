@@ -1,4 +1,5 @@
 services:
+  # Databases
   postgres:
     container_name: jwt-sessions-postgres
     image: postgres:15
@@ -25,3 +26,38 @@ services:
       - redis_data:/data
     networks:
       - jwt_network
+
+  # Observability
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    command: -config.file=/etc/loki/local-config.yaml -validation.allow-structured-metadata=false
+    networks:
+      - jwt_network
+    ports:
+      # OBS: Deixar o loki exposto assim pode ocasionar falha de segurança.
+      # o loki não possui sistema de autenticação próprio, então se for rodar em producao
+      # deoxe e, rede privada em expor a porta de forma publica (internet). E certifiquse se o firewall
+      # não esta habilitado.
+      - 3100:3100
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "9090:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_INITIAL_USER}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_INITIAL_PASSWORD}
+    depends_on:
+      - loki
+    networks:
+      - jwt_network
+
+networks:
+  jwt_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:

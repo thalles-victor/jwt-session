@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS "users" (
+  id VARCHAR(40) PRIMARY key,
+  name VARCHAR(50) NOT null,
+  email VARCHAR(140) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);

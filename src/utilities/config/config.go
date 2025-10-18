@@ -10,6 +10,7 @@ import (
 
 var (
 	DATABASE_CONNECTION = ""
+	LOKI_CONNECTION     = ""
 	JWT_SEC_KEY         []byte
 )
 
@@ -28,6 +29,11 @@ func LoadEnv() {
 		os.Getenv("POSTGRES_PORT"),
 		os.Getenv("POSTGRES_DB"),
 	)
+
+	LOKI_CONNECTION = os.Getenv("LOKI_CONNECTION")
+	if LOKI_CONNECTION == "" {
+		fmt.Println("LOKI_CONNECTION variable not passed in env file")
+	}
 
 	JWT_SEC_KEY = []byte(os.Getenv("JWT_SEC_KEY"))
 }

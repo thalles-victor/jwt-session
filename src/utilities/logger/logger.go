@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"jwt-session/src/utilities/config"
+
 	"log"
 	"net/http"
 	"os"
@@ -19,7 +21,6 @@ var (
 	Error *log.Logger
 	Debug *log.Logger
 
-	lokiURL = "http://loki:3100/loki/api/v1/push"
 	appName = "my-go-app"
 
 	bufferMutex sync.Mutex
@@ -113,7 +114,7 @@ func flushLogs() {
 	}
 
 	client := &http.Client{Timeout: 5 * time.Second}
-	req, err := http.NewRequest("POST", lokiURL, bytes.NewBuffer(data))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/loki/api/v1/push", config.LOKI_CONNECTION), bytes.NewBuffer(data))
 	if err != nil {
 		log.Println("Falha ao criar requisição para Loki:", err)
 		return

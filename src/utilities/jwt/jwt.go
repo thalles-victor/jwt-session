@@ -1,7 +1,7 @@
 package jwt
 
 import (
-	"jwt-session/src/config"
+	"jwt-session/src/utilities/config"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"

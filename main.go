@@ -1,20 +1,34 @@
 package main
 
 import (
-	"jwt-session/src/logger"
+	"fmt"
 	"jwt-session/src/routes"
+	"jwt-session/src/utilities/config"
+	"jwt-session/src/utilities/database"
+	"jwt-session/src/utilities/logger"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 func main() {
-	app := fiber.New()
 	logger.Init()
+	config.LoadEnv()
+	app := fiber.New()
 
+	logger.Info.Println("connecting in the database")
+	db, err := database.Connect()
+
+	if err != nil {
+		logger.Error.Printf("error when connect in the database. error %s \n", err.Error())
+		log.Fatalf("error when connect in the database %s", err.Error())
+	}
+	db.Close()
+
+	logger.Info.Println("setup routes")
 	routes.Setup(app)
 
 	port := ":8080"
-	logger.Info.Printf("Start the server in http://localhost%s", port)
+	fmt.Printf("Start the server in http://localhost%s \n", port)
 	log.Fatal((app.Listen(port)))
 }

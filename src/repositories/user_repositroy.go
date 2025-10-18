@@ -33,7 +33,7 @@ func (r *UserRepository) GetByEmail(email string, user *models.User) error {
 	return nil
 }
 
-func (r *UserRepository) Create(user *models.User) error {
+func (r *UserRepository) Create(user *models.User) (models.User, error) {
 	if user.CreatedAt.IsZero() {
 		user.CreatedAt = time.Now()
 	}
@@ -41,9 +41,19 @@ func (r *UserRepository) Create(user *models.User) error {
 	query := `
 		INSERT INTO users (id, name, email, password, created_at)
 		VALUES ($1, $2, $3, $4, $5)
+		RETURNING *
 	`
 
-	_, err := r.db.Exec(query, user.ID, user.Name, user.Email, user.Password, user.CreatedAt)
+	var createdUser models.User
+	if err := r.db.Get(&createdUser, query,
+		user.ID,
+		user.Name,
+		user.Email,
+		user.Password,
+		user.CreatedAt,
+	); err != nil {
+		return models.User{}, err
+	}
 
-	return err
+	return createdUser, nil
 }
