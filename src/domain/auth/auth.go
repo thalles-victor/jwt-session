@@ -9,6 +9,7 @@ import (
 	"jwt-session/src/utilities/database"
 	"jwt-session/src/utilities/jwt"
 	"jwt-session/src/utilities/logger"
+	"jwt-session/src/utilities/mail"
 	"net/http"
 	"time"
 
@@ -82,6 +83,13 @@ func SinUp(c *fiber.Ctx) error {
 			"error":   err.Error(),
 		})
 	}
+
+	go func() {
+		err = mail.SendCreateAccount(user.Name, user.Email)
+		if err != nil {
+			logger.Error.Printf("error when send email to user to confirm the account creation")
+		}
+	}()
 
 	return c.JSON(fiber.Map{
 		"message": "usuário cadastrado com sucesso",
