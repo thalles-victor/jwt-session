@@ -16,7 +16,7 @@ func NewUserRepository(db *sqlx.DB) *UserRepository {
 }
 
 func (r *UserRepository) GetById(id string, user *models.User) error {
-	err := r.db.Get(&user, `SELECT name, email, password, created_at FROM users WHERE id = ?`, id)
+	err := r.db.Get(user, `SELECT name, email, password, created_at FROM "users" WHERE id = $1`, id)
 	if err != nil {
 		return err
 	}
@@ -25,7 +25,7 @@ func (r *UserRepository) GetById(id string, user *models.User) error {
 }
 
 func (r *UserRepository) GetByEmail(email string, user *models.User) error {
-	err := r.db.Get(&user, `SELECT name, email, password, created_at FROM users WHERE email = ?`, email)
+	err := r.db.Get(user, `SELECT id, name, email, password, created_at FROM "users" WHERE email = $1`, email)
 	if err != nil {
 		return err
 	}
@@ -39,9 +39,9 @@ func (r *UserRepository) Create(user *models.User) (models.User, error) {
 	}
 
 	query := `
-		INSERT INTO users (id, name, email, password, created_at)
+		INSERT INTO "users" (id, name, email, password, created_at)
 		VALUES ($1, $2, $3, $4, $5)
-		RETURNING *
+		RETURNING id, name, email, password, created_at
 	`
 
 	var createdUser models.User

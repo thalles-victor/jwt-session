@@ -7,6 +7,7 @@ import (
 	"jwt-session/src/models"
 	"jwt-session/src/repositories"
 	"jwt-session/src/utilities/database"
+	"jwt-session/src/utilities/jwt"
 	"jwt-session/src/utilities/logger"
 	"net/http"
 	"time"
@@ -50,7 +51,7 @@ func SinUp(c *fiber.Ctx) error {
 
 	if err == nil {
 		logger.Warn.Printf("user with email %s already registered.\n", body.Email)
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{
 			"message": fmt.Sprintf("user with email %s already registered", body.Email),
 		})
 	}
@@ -74,10 +75,21 @@ func SinUp(c *fiber.Ctx) error {
 		})
 	}
 
+	jwt, err := jwt.GenerateJwt(userCreated.ID)
+	if err != nil {
+		c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"message": "internal server error when generate jwt.",
+			"error":   err.Error(),
+		})
+	}
+
 	return c.JSON(fiber.Map{
 		"message": "usuário cadastrado com sucesso",
-		"data":    body,
 		"user":    userCreated,
+		"access_token": fiber.Map{
+			"jwt":     jwt,
+			"expires": "devo pegar das envs, dps eu faço isso",
+		},
 	})
 }
 
@@ -90,8 +102,57 @@ func SignIn(c *fiber.Ctx) error {
 		})
 	}
 
+	db, err := database.Connect()
+	if err != nil {
+		logger.Error.Printf("error when connect in the databse. err: %s \n", err.Error())
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"message": "erro when connect in the database",
+			"error":   err.Error(),
+		})
+	}
+	defer db.Close()
+
+	userRepository := repositories.NewUserRepository(db)
+
+	logger.Info.Printf("check if user with email %s exist", body.Email)
+	var user models.User
+	if err = userRepository.GetByEmail(body.Email, &user); err != nil {
+		if err != sql.ErrNoRows {
+			logger.Warn.Printf("user with email %s un registered. \n", body.Email)
+			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+				"message": fmt.Sprintf("user with email %s unregistered", body.Email),
+				"error":   err.Error(),
+			})
+		}
+		logger.Error.Printf("errro when get user from database. error: %s \n", err.Error())
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"message": "erro when get user from database",
+			"error":   err.Error(),
+		})
+	}
+
+	logger.Info.Println("check if password is valid")
+	if user.Password != body.Password {
+		logger.Warn.Printf("password of user %s is invalid", user.Email)
+		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{
+			"message": "password is inválid",
+		})
+	}
+
+	jwt, err := jwt.GenerateJwt(user.ID)
+	if err != nil {
+		c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"message": "internal server error when generate jwt.",
+			"error":   err.Error(),
+		})
+	}
+
 	return c.JSON(fiber.Map{
 		"message": "usuário logado com sucesso",
-		"data":    body,
+		"user":    user,
+		"access_token": fiber.Map{
+			"jwt":        jwt,
+			"expires_in": "depois eu faço isso...",
+		},
 	})
 }
