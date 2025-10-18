@@ -1,6 +1,7 @@
 package main
 
 import (
+	"jwt-session/src/logger"
 	"jwt-session/src/routes"
 	"log"
 
@@ -9,8 +10,11 @@ import (
 
 func main() {
 	app := fiber.New()
+	logger.Init()
 
 	routes.Setup(app)
 
-	log.Fatal((app.Listen(":8080")))
+	port := ":8080"
+	logger.Info.Printf("Start the server in http://localhost%s", port)
+	log.Fatal((app.Listen(port)))
 }
