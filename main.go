@@ -1,6 +1,7 @@
 package main
 
 import (
+	"jwt-session/src/routes"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
@@ -9,9 +10,7 @@ import (
 func main() {
 	app := fiber.New()
 
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, World!")
-	})
+	routes.Setup(app)
 
 	log.Fatal((app.Listen(":8080")))
 }
