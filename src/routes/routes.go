@@ -19,4 +19,11 @@ func Setup(app *fiber.App) {
 	v1Auth := v1.Group("auth")
 	v1Auth.Post("/sign-in", domain_auth.SignIn)
 	v1Auth.Post("/sign-up", domain_auth.SinUp)
+
+	//===============
+	// (v1) Session Auth
+	//================
+	v1SessionAuth := v1Auth.Group("/session")
+	v1SessionAuth.Post("/sign-in", domain_auth.SignInWithSession)
+	v1SessionAuth.Post("/sign-up", domain_auth.SinUpWithSession)
 }
