@@ -255,6 +255,12 @@ func ChangePasswordRequestRecovery(c *fiber.Ctx) error {
 		})
 	}
 
+	go func() {
+		if err := mail.SendConfirmationChangePassword(user.Name, user.Email, "http://dominio-do-front-que-tem-que-terlogi"); err != nil {
+			logger.Error.Printf("internal server error when send change password confirmation. error: %s", err.Error())
+		}
+	}()
+
 	return c.JSON(fiber.Map{
 		"message": "senha alterada com sucesso",
 	})

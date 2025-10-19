@@ -8,6 +8,7 @@ type User struct {
 	Email     string    `json:"email" db:"email"`
 	Password  string    `json:"password" db:"password"`
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
 }
 
 type Recovery struct {
@@ -23,10 +24,10 @@ type Recovery struct {
 }
 
 type Session struct {
-	ID        string    `db:"id"`
-	UserID    string    `db:"user_id"`
-	Browser   *string   `db:"browser"`
-	IP        *string   `db:"ip"`
-	CreatedAt time.Time `db:"created_at"`
-	ExpiresAt time.Time `db:"expires_at"`
+	ID        string    `json:"id" db:"id"`
+	UserID    string    `json:"user_id" db:"user_id"`
+	Browser   *string   `json:"browser" db:"browser"`
+	IP        *string   `json:"ip" db:"ip"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
+	ExpiresAt time.Time `json:"expires_at" db:"expires_at"`
 }
