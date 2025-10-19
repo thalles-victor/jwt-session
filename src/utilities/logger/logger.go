@@ -114,7 +114,7 @@ func flushLogs() {
 	}
 
 	client := &http.Client{Timeout: 5 * time.Second}
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/loki/api/v1/push", config.LOKI_CONNECTION), bytes.NewBuffer(data))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/loki/api/v1/push", config.GRAFANA_LOKI_CONNECTION), bytes.NewBuffer(data))
 	if err != nil {
 		log.Println("Falha ao criar requisição para Loki:", err)
 		return

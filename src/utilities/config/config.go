@@ -10,13 +10,13 @@ import (
 )
 
 var (
-	DATABASE_CONNECTION = ""
-	LOKI_CONNECTION     = ""
-	JWT_SEC_KEY         []byte
-	MAIL_HOST           = ""
-	MAIL_USER           = ""
-	MAIL_PASS           = ""
-	MAIL_PORT           int
+	DATABASE_CONNECTION     = ""
+	GRAFANA_LOKI_CONNECTION = ""
+	JWT_SEC_KEY             []byte
+	MAIL_HOST               = ""
+	MAIL_USER               = ""
+	MAIL_PASS               = ""
+	MAIL_PORT               int
 )
 
 func LoadEnv() {
@@ -37,9 +37,9 @@ func LoadEnv() {
 
 	loadMailCredentialsWithPanicOnError()
 
-	LOKI_CONNECTION = os.Getenv("LOKI_CONNECTION")
-	if LOKI_CONNECTION == "" {
-		fmt.Println("LOKI_CONNECTION variable not passed in env file")
+	GRAFANA_LOKI_CONNECTION = os.Getenv("LOKI_CONNECTION")
+	if GRAFANA_LOKI_CONNECTION == "" {
+		fmt.Println("GRAFANA_LOKI_CONNECTION variable not passed in env file")
 	}
 
 	JWT_SEC_KEY = []byte(os.Getenv("JWT_SEC_KEY"))

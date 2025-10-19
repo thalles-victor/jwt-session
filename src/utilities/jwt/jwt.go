@@ -1,10 +1,14 @@
 package jwt
 
 import (
+	"context"
+	"fmt"
 	"jwt-session/src/utilities/config"
+	"jwt-session/src/utilities/database"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/google/uuid"
 )
 
 func GenerateJwt(sub string) (string, error) {
@@ -27,4 +31,40 @@ func ParseJWT(tokenAsString string) (string, error) {
 	}
 
 	return "", err
+}
+
+type GenerateJwtSessionProps struct {
+	UserId  string
+	Browser *string
+	IP      *string
+}
+
+func GenerateJwtSession(p GenerateJwtSessionProps) (sessionId string, jwt string, err error) {
+	client := database.GetRedisClient()
+	ctx := context.Background()
+
+	sessionId = fmt.Sprintf("session-%s", uuid.New().String())
+
+	hashFields := []string{
+		"userId", p.UserId,
+	}
+
+	if p.Browser != nil {
+		hashFields = append(hashFields, "browser", *p.Browser)
+	}
+
+	if p.IP != nil {
+		hashFields = append(hashFields, *p.IP)
+	}
+
+	if _, err = client.HSet(ctx, sessionId, hashFields).Result(); err != nil {
+		return
+	}
+
+	jwt, err = GenerateJwt(sessionId)
+	if err != nil {
+		return
+	}
+
+	return
 }
