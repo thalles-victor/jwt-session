@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>jwt-session — API Documentation</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <header class="hero">
+    <div class="container">
+      <h1>jwt-session — API Documentation</h1>
+      <p class="intro">
+        Esta documentação descreve a estrutura de autenticação da API
+        <strong>jwt-session</strong>, abordando tanto o uso de autenticação
+        baseada em <strong>token</strong> puro quanto a abordagem com
+        <strong>sessões gerenciadas</strong>.
+      </p>
+      <div class="info-box">
+        <h3>🔐 Sessão vs Token</h3>
+        <p><strong>Com sessão:</strong> o servidor mantém um controle centralizado
+          de sessões ativas, o que aumenta a segurança. Isso permite revogar
+          sessões específicas, rastrear logins e limitar o tempo de uso de cada
+          token. É ideal para ambientes mais sensíveis e integrados com
+          containers (ex: Docker), onde o controle do ciclo de vida da sessão é
+          fundamental.</p>
+        <p><strong>Sem sessão:</strong> o token é auto contido (JWT puro),
+          válido até expirar. É simples e escalável, porém mais difícil de
+          invalidar manualmente. Ideal para APIs sem necessidade de logout
+          centralizado.</p>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section>
+      <h2>Resumo</h2>
+      <p>Esta documentação cobre os endpoints presentes na pasta
+        <code>jwt-session → auth → session | recovery | normal auth</code>.
+      </p>
+    </section>
+
+    <section>
+      <h2>Endpoints — auth / normal auth</h2>
+
+      <article class="endpoint">
+        <h3><span class="method post">POST</span> /v1/auth/sign-in</h3>
+        <p>Sign in "normal auth". Body igual ao exemplo de session sign-in.</p>
+        <h4>Body (JSON)</h4>
+        <pre>{
+  "email": "thalles@gmail.com",
+  "password": "minhasenha123"
+}</pre>
+      </article>
+
+      <article class="endpoint">
+        <h3><span class="method post">POST</span> /v1/auth/sign-up</h3>
+        <p>Sign up "normal auth". Body igual ao exemplo de session sign-up.</p>
+        <h4>Body (JSON)</h4>
+        <pre>{
+  "name": "thalles",
+  "email": "thalles@gmail.com",
+  "password": "minhasenha123"
+}</pre>
+      </article>
+    </section>
+
+    <section>
+      <h2>Endpoints — auth / session</h2>
+
+      <article class="endpoint">
+        <h3><span class="method post">POST</span> /v1/auth/session/sign-in</h3>
+        <p class="muted">Nome na coleção: <strong>sign in</strong></p>
+        <p>Autenticação com controle de sessão. Retorna token e ID de sessão.</p>
+        <h4>Headers</h4>
+        <ul>
+          <li>Content-Type: application/json</li>
+          <li>User-Agent: insomnia/11.1.0</li>
+        </ul>
+        <h4>Body (JSON)</h4>
+        <pre>{
+  "email": "thalles@gmail.com",
+  "password": "minhasenha123"
+}</pre>
+      </article>
+
+      <article class="endpoint">
+        <h3><span class="method post">POST</span> /v1/auth/session/sign-up</h3>
+        <p class="muted">Nome na coleção: <strong>sign up</strong></p>
+        <p>Cria uma conta / registra usuário e gera sessão inicial.</p>
+        <h4>Headers</h4>
+        <ul>
+          <li>Content-Type: application/json</li>
+          <li>User-Agent: insomnia/11.1.0</li>
+        </ul>
+        <h4>Body (JSON)</h4>
+        <pre>{
+  "name": "thalles",
+  "email": "thalles@gmail.com",
+  "password": "minhasenha123"
+}</pre>
+      </article>
+
+      <article class="endpoint">
+        <h3><span class="method get">GET</span> /v1/auth/session</h3>
+        <p>Recupera a sessão do usuário autenticado.</p>
+        <h4>Authentication</h4>
+        <p>Bearer token (exemplo):</p>
+        <pre>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</pre>
+      </article>
+
+      <article class="endpoint">
+        <h3><span class="method get">GET</span> /v1/auth/session/all</h3>
+        <p>Lista todas as sessões (admin).</p>
+      </article>
+
+      <article class="endpoint">
+        <h3><span class="method delete">DELETE</span> /v1/auth/session/{sessionId}</h3>
+        <p>Revoga uma sessão ativa manualmente.</p>
+      </article>
+    </section>
+
+    <section>
+      <h2>Endpoints — auth / recovery</h2>
+
+      <article class="endpoint">
+        <h3><span class="method post">POST</span> /v1/auth/recovery/request/{email}</h3>
+        <p>Solicita recuperação de conta para o email informado.</p>
+      </article>
+
+      <article class="endpoint">
+        <h3><span class="method post">POST</span> /v1/auth/recovery/change-password</h3>
+        <p>Define nova senha usando código recebido por e-mail.</p>
+        <h4>Body (JSON)</h4>
+        <pre>{
+  "email": "thalles@gmail.com",
+  "new_password": "Senha123",
+  "code": "6N4TeeLJosJEOgp099SfjEYZxJvC0CWXrnosN3OgCSKf8f0x2JAxXU3wZHBnCotb..."
+}</pre>
+      </article>
+    </section>
+  </main>
+</body>
+
+</html>
