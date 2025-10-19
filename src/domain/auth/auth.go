@@ -250,6 +250,13 @@ func SinUpWithSession(c *fiber.Ctx) error {
 	}
 
 	sessionCreated, err := sessionRepository.Create(&session)
+	if err != nil {
+		logger.Error.Printf("internal server error when create session: error: %s", err.Error())
+		c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"message": "erro interno no servidor ao criar a sessão",
+			"error":   err.Error(),
+		})
+	}
 
 	jwt, err := jwt.GenerateJwt(session.ID)
 	if err != nil {
@@ -261,11 +268,7 @@ func SinUpWithSession(c *fiber.Ctx) error {
 	}
 
 	if err != nil {
-		logger.Error.Printf("internal server error when save session in the database. error: %s")
-	}
-
-	if err != nil {
-		logger.Error.Printf("Error when generate session. err: ", err.Error())
+		logger.Error.Printf("Error when generate session. err: %s", err.Error())
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"message": "erro interno no servidor ao criar a sessão para o usuário.",
 			"error":   err.Error(),
@@ -360,19 +363,19 @@ func SignInWithSession(c *fiber.Ctx) error {
 	}
 
 	sessionCreated, err := sessionRepository.Create(&session)
+	if err != nil {
+		logger.Error.Printf("internal server error when create session: error: %s", err.Error())
+		c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"message": "erro interno no servidor ao criar a sessão",
+			"error":   err.Error(),
+		})
+	}
 
 	jwt, err := jwt.GenerateJwt(session.ID)
 	if err != nil {
 		logger.Error.Printf("internal server error when generate jwt. error: %s", err.Error())
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"message": "erro interno no servidor ao tentar gerar o token de acesso",
-			"error":   err.Error(),
-		})
-	}
-	if err != nil {
-		logger.Error.Printf("internal server error when generate session to user. err %s", err.Error())
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"message": "error interno no servidor ao gerar ao gerar a sessão para o usuário",
 			"error":   err.Error(),
 		})
 	}

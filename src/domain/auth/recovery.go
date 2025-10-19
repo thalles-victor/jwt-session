@@ -186,7 +186,7 @@ func ChangePasswordRequestRecovery(c *fiber.Ctx) error {
 	if recovery.Attempts > 10 {
 		logger.Warn.Printf("number of attempts exceed, clear recovery data")
 		if err = recoveryRepository.MarkAsExpired(recovery.ID); err != nil {
-			logger.Error.Printf("internal server error when make make as expired. error", err.Error())
+			logger.Error.Printf("internal server error when make make as expired. error %s", err.Error())
 			return c.Status(http.StatusNotAcceptable).JSON(fiber.Map{
 				"message": "erro interno no servidor ao expierar o token",
 			})
