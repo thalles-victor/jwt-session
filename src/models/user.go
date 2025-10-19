@@ -9,3 +9,14 @@ type User struct {
 	Password  string    `json:"password" db:"password"`
 	CreatedAt time.Time `json:"created_at" db:"created_at"`
 }
+
+type Recovery struct {
+	ID        int       `db:"id"`
+	UserID    string    `db:"user_id"`
+	Email     string    `db:"email"`
+	Code      string    `db:"code"`
+	Attempts  int       `db:"attempts"`
+	ExpiresAt time.Time `db:"expires_at"`
+	CreatedAt time.Time `db:"created_at"`
+	UpdatedAt time.Time `db:"updated_at"`
+}

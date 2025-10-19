@@ -57,3 +57,14 @@ func (r *UserRepository) Create(user *models.User) (models.User, error) {
 
 	return createdUser, nil
 }
+
+// UpdatePassword atualiza a senha do usuário pelo ID
+func (r *UserRepository) UpdatePassword(userID string, newPassword string) error {
+	_, err := r.db.Exec(`
+		UPDATE "users"
+		SET password = $1, updated_at = $2
+		WHERE id = $3
+	`, newPassword, time.Now(), userID)
+
+	return err
+}
