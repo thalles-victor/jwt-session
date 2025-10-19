@@ -61,3 +61,21 @@ func (r *SessionRepository) Create(session *models.Session) (*models.Session, er
 
 	return &createdSession, nil
 }
+
+// DeleteByID deleta uma sessão pelo ID
+func (r *SessionRepository) DeleteByID(id string) error {
+	_, err := r.db.Exec(`
+		DELETE FROM sessions
+		WHERE id = $1
+	`, id)
+	return err
+}
+
+// DeleteByID deleta uma sessão pelo ID
+func (r *SessionRepository) DeleteByUserId(userId string) error {
+	_, err := r.db.Exec(`
+		DELETE FROM sessions
+		WHERE user_id = $1
+	`, userId)
+	return err
+}

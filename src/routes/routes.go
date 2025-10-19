@@ -36,11 +36,15 @@ func Setup(app *fiber.App) {
 				"user_id": userId,
 			})
 		})
+		v1SessionAuth.Get("/all", middlewares.JwtSessionMiddleware, domain_auth.GetAllSessionsFromUser)
+		v1SessionAuth.Delete("/:sessionId", middlewares.JwtSessionMiddleware, domain_auth.DeleteSessionFromUser)
 
 		//====================================================================================
 		// (v1) Recovery Auth
 		//====================================================================================
 		v1AuthRecovery := v1Auth.Group("/recovery")
 		v1AuthRecovery.Post("/request/:email", domain_auth.RequestRecovery)
+		v1AuthRecovery.Post("/change-password", domain_auth.ChangePasswordRequestRecovery)
+
 	}
 }

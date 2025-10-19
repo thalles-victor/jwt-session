@@ -213,6 +213,16 @@ func ChangePasswordRequestRecovery(c *fiber.Ctx) error {
 		})
 	}
 
+	logger.Info.Printf("deleting all sessions from use with id: %s", user.ID)
+	sessionRepository := repositories.NewSessionRepository(db)
+	if err = sessionRepository.DeleteByUserId(user.ID); err != nil {
+		logger.Error.Printf("internal server error when delete all sessions from user. error: %s", err.Error())
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"message": "erro interno no sevidor ao deletar todas as sessões de um usuário",
+			"error":   err.Error(),
+		})
+	}
+
 	return c.JSON(fiber.Map{
 		"message": "senha alterada com sucesso",
 	})
