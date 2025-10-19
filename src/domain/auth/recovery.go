@@ -197,7 +197,14 @@ func ChangePasswordRequestRecovery(c *fiber.Ctx) error {
 	}
 
 	if !date.IsNotExpired(recovery.ExpiresAt) {
-		recoveryRepository.MarkAsExpired(recovery.ID)
+		if err = recoveryRepository.MarkAsExpired(recovery.ID); err != nil {
+			logger.Error.Printf("internal server error when disable recovery code")
+			c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+				"messge": "erro interno no servidor ao desativer o codigo de recuperação",
+				"error":  err.Error(),
+			})
+		}
+
 		logger.Warn.Printf("recovery code already expires at: %s", recovery.ExpiresAt)
 		return c.Status(http.StatusNotAcceptable).JSON(fiber.Map{
 			"message": "codigo de recuperação já expirou",
@@ -236,6 +243,15 @@ func ChangePasswordRequestRecovery(c *fiber.Ctx) error {
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 			"message": "erro interno no sevidor ao deletar todas as sessões de um usuário",
 			"error":   err.Error(),
+		})
+	}
+
+	logger.Info.Println("disble recovery code")
+	if err = recoveryRepository.MarkAsExpired(recovery.ID); err != nil {
+		logger.Error.Printf("internal server error when disable recovery code")
+		c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"messge": "erro interno no servidor ao desativer o codigo de recuperação",
+			"error":  err.Error(),
 		})
 	}
 
