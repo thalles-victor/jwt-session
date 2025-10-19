@@ -17,11 +17,6 @@ var (
 	MAIL_USER               string
 	MAIL_PASS               string
 	MAIL_PORT               int
-
-	REDIS_ADDR string
-	REDIS_USER string
-	REDIS_pass string
-	REDIS_DB   int
 )
 
 func LoadEnv() {
@@ -41,7 +36,6 @@ func LoadEnv() {
 	)
 
 	loadMailCredentialsWithPanicOnError()
-	loadRedisEnvWithPanicOnError()
 
 	GRAFANA_LOKI_CONNECTION = os.Getenv("LOKI_CONNECTION")
 	if GRAFANA_LOKI_CONNECTION == "" {
@@ -74,19 +68,4 @@ func loadMailCredentialsWithPanicOnError() error {
 	MAIL_PORT = mailPort
 
 	return nil
-}
-
-func loadRedisEnvWithPanicOnError() {
-	addr := os.Getenv("REDIS_ADDR")
-	user := os.Getenv("REDIS_USER")
-	pass := os.Getenv("REDIS_PASS")
-
-	if addr == "" || user == "" || pass == "" {
-		log.Fatal("estão faltando váriaveis do redis, checa ai meu parceiro")
-	}
-
-	REDIS_ADDR = addr
-	REDIS_USER = user
-	REDIS_pass = pass
-	REDIS_DB = 0
 }

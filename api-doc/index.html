@@ -23,9 +23,7 @@
         <p><strong>Com sessão:</strong> o servidor mantém um controle centralizado
           de sessões ativas, o que aumenta a segurança. Isso permite revogar
           sessões específicas, rastrear logins e limitar o tempo de uso de cada
-          token. É ideal para ambientes mais sensíveis e integrados com
-          containers (ex: Docker), onde o controle do ciclo de vida da sessão é
-          fundamental.</p>
+          token.</p>
         <p><strong>Sem sessão:</strong> o token é auto contido (JWT puro),
           válido até expirar. É simples e escalável, porém mais difícil de
           invalidar manualmente. Ideal para APIs sem necessidade de logout
@@ -53,6 +51,22 @@
   "email": "thalles@gmail.com",
   "password": "minhasenha123"
 }</pre>
+
+        <h4>Respoonse Body (JSON)</h4>
+        <pre>{
+  "access_token": {
+    "expires_in": "depois eu faço isso...",
+    "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjA4ODgzMDYsInN1YiI6Ijk2MmUzZTdlLTkyMjktNGVkMC05ZTQwLTJhNDdkZWQ4MGI3MSJ9.FTq1fTMZBsuygjg7H5HgUDZBGxn3TkqvSHkFqmUg9so"
+  },
+  "message": "usuário logado com sucesso",
+  "user": {
+    "id": "962e3e7e-9229-4ed0-9e40-2a47ded80b71",
+    "name": "thalles",
+    "email": "thalles@gmail.com",
+    "password": "minhasenha123",
+    "created_at": "2025-10-19T10:44:01.831682Z"
+  }
+}</pre>
       </article>
 
       <article class="endpoint">
@@ -63,6 +77,22 @@
   "name": "thalles",
   "email": "thalles@gmail.com",
   "password": "minhasenha123"
+}</pre>
+
+        <h4>Respoonse Body (JSON)</h4>
+        <pre>{
+  "access_token": {
+    "expires_in": "depois eu faço isso...",
+    "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjA4ODgzMDYsInN1YiI6Ijk2MmUzZTdlLTkyMjktNGVkMC05ZTQwLTJhNDdkZWQ4MGI3MSJ9.FTq1fTMZBsuygjg7H5HgUDZBGxn3TkqvSHkFqmUg9so"
+  },
+  "message": "usuário logado com sucesso",
+  "user": {
+    "id": "962e3e7e-9229-4ed0-9e40-2a47ded80b71",
+    "name": "thalles",
+    "email": "thalles@gmail.com",
+    "password": "minhasenha123",
+    "created_at": "2025-10-19T10:44:01.831682Z"
+  }
 }</pre>
       </article>
     </section>
@@ -84,6 +114,32 @@
   "email": "thalles@gmail.com",
   "password": "minhasenha123"
 }</pre>
+
+        <h4>Respoonse Body (JSON)</h4>
+        <pre>{
+  "access_token": {
+    "expires_in": "depois eu faço isso...",
+    "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjA4OTEzMDYsInN1YiI6ImIzODFkOWU1LWY4OTYtNGZjYy05NzYwLWY3N2RhZDkyZGY0NSJ9.ZI-UBJ1G14crY79vCKgyK8ztJPXW0q4hflqEBTjGLTI"
+  },
+  "message": "usuário logado com sucesso",
+  "session": {
+    "id": "b381d9e5-f896-4fcc-9760-f77dad92df45",
+    "user_id": "84d9de30-6f6c-4251-bf42-edcddb4f6b85",
+    "browser": "insomnia/11.1.0",
+    "ip": "127.0.0.1",
+    "created_at": "2025-10-19T15:28:26.82801Z",
+    "expires_at": "2025-10-20T15:28:26.828004Z"
+  },
+  "user": {
+    "id": "84d9de30-6f6c-4251-bf42-edcddb4f6b85",
+    "name": "thalles",
+    "email": "thalles@gmail.com",
+    "password": "minhasenha123",
+    "created_at": "2025-10-19T15:26:23.567108Z",
+    "updated_at": "0001-01-01T00:00:00Z"
+  }
+}
+</pre>
       </article>
 
       <article class="endpoint">
@@ -101,6 +157,33 @@
   "email": "thalles@gmail.com",
   "password": "minhasenha123"
 }</pre>
+
+
+        <h4>Respoonse Body (JSON)</h4>
+        <pre>{
+  "access_token": {
+    "expires_in": "depois eu faço isso...",
+    "jwt": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjA4OTEzMDYsInN1YiI6ImIzODFkOWU1LWY4OTYtNGZjYy05NzYwLWY3N2RhZDkyZGY0NSJ9.ZI-UBJ1G14crY79vCKgyK8ztJPXW0q4hflqEBTjGLTI"
+  },
+  "message": "usuário logado com sucesso",
+  "session": {
+    "id": "b381d9e5-f896-4fcc-9760-f77dad92df45",
+    "user_id": "84d9de30-6f6c-4251-bf42-edcddb4f6b85",
+    "browser": "insomnia/11.1.0",
+    "ip": "127.0.0.1",
+    "created_at": "2025-10-19T15:28:26.82801Z",
+    "expires_at": "2025-10-20T15:28:26.828004Z"
+  },
+  "user": {
+    "id": "84d9de30-6f6c-4251-bf42-edcddb4f6b85",
+    "name": "thalles",
+    "email": "thalles@gmail.com",
+    "password": "minhasenha123",
+    "created_at": "2025-10-19T15:26:23.567108Z",
+    "updated_at": "0001-01-01T00:00:00Z"
+  }
+}
+</pre>
       </article>
 
       <article class="endpoint">
@@ -109,16 +192,69 @@
         <h4>Authentication</h4>
         <p>Bearer token (exemplo):</p>
         <pre>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</pre>
+
+        <h4>Respoonse Body (JSON)</h4>
+        <pre>{
+  "message": "sessão válida",
+  "user_id": "962e3e7e-9229-4ed0-9e40-2a47ded80b71"
+}
+</pre>
       </article>
 
       <article class="endpoint">
         <h3><span class="method get">GET</span> /v1/auth/session/all</h3>
         <p>Lista todas as sessões (admin).</p>
+
+        <h4>Respoonse Body (JSON)</h4>
+        <pre>{
+  "message": "sessões encontradas com successo",
+  "sessions": [
+    {
+      "id": "dfc90a43-9d7f-4139-bc8d-d0468cd1b2c1",
+      "user_id": "84d9de30-6f6c-4251-bf42-edcddb4f6b85",
+      "browser": "insomnia/11.1.0",
+      "ip": "127.0.0.1",
+      "created_at": "2025-10-19T15:26:23.593785Z",
+      "expires_at": "2025-10-20T15:26:23.593777Z"
+    },
+    {
+      "id": "7fe6499a-e456-4eee-b231-7c0182087c45",
+      "user_id": "84d9de30-6f6c-4251-bf42-edcddb4f6b85",
+      "browser": "insomnia/11.1.0",
+      "ip": "127.0.0.1",
+      "created_at": "2025-10-19T15:26:26.094486Z",
+      "expires_at": "2025-10-20T15:26:26.094484Z"
+    },
+    {
+      "id": "5901f648-b830-40d4-be07-6909822eacdc",
+      "user_id": "84d9de30-6f6c-4251-bf42-edcddb4f6b85",
+      "browser": "insomnia/11.1.0",
+      "ip": "127.0.0.1",
+      "created_at": "2025-10-19T15:27:13.837087Z",
+      "expires_at": "2025-10-20T15:27:13.837084Z"
+    },
+    {
+      "id": "b381d9e5-f896-4fcc-9760-f77dad92df45",
+      "user_id": "84d9de30-6f6c-4251-bf42-edcddb4f6b85",
+      "browser": "insomnia/11.1.0",
+      "ip": "127.0.0.1",
+      "created_at": "2025-10-19T15:28:26.82801Z",
+      "expires_at": "2025-10-20T15:28:26.828004Z"
+    }
+  ]
+}
+</pre>
       </article>
 
       <article class="endpoint">
         <h3><span class="method delete">DELETE</span> /v1/auth/session/{sessionId}</h3>
         <p>Revoga uma sessão ativa manualmente.</p>
+
+        <h4>Respoonse Body (JSON)</h4>
+        <pre>{
+  "message": "sessão deletada com sucesso"
+}
+</pre>
       </article>
     </section>
 
@@ -128,6 +264,12 @@
       <article class="endpoint">
         <h3><span class="method post">POST</span> /v1/auth/recovery/request/{email}</h3>
         <p>Solicita recuperação de conta para o email informado.</p>
+
+        <h4>Respoonse Body (JSON)</h4>
+        <pre>{
+  "message": "o codigo de recuperacao foi enviado no email thalles@gmail.com com sucesso"
+}
+</pre>
       </article>
 
       <article class="endpoint">
@@ -139,6 +281,12 @@
   "new_password": "Senha123",
   "code": "6N4TeeLJosJEOgp099SfjEYZxJvC0CWXrnosN3OgCSKf8f0x2JAxXU3wZHBnCotb..."
 }</pre>
+
+        <h4>Respoonse Body (JSON)</h4>
+        <pre>{
+  "message": "senha alterada com sucesso"
+}
+</pre>
       </article>
     </section>
   </main>
