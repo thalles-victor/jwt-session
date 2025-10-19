@@ -20,3 +20,12 @@ type Recovery struct {
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
 }
+
+type Session struct {
+	ID        string    `db:"id"`
+	UserID    string    `db:"user_id"`
+	Browser   *string   `db:"browser"`
+	IP        *string   `db:"ip"`
+	CreatedAt time.Time `db:"created_at"`
+	ExpiresAt time.Time `db:"expires_at"`
+}

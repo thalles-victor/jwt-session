@@ -25,3 +25,9 @@ func GenerateFutureDate(value int, unit string) (time.Time, error) {
 		return time.Time{}, errors.New("unidade de tempo inválida")
 	}
 }
+
+// IsNotExpired retorna true se a data ainda não expirou
+func IsNotExpired(expiresAt time.Time) bool {
+	// time.Now() retorna a data atual
+	return time.Now().Before(expiresAt)
+}

@@ -7,6 +7,7 @@ import (
 	"jwt-session/src/models"
 	"jwt-session/src/repositories"
 	"jwt-session/src/utilities/database"
+	"jwt-session/src/utilities/date"
 	"jwt-session/src/utilities/jwt"
 	"jwt-session/src/utilities/logger"
 	"jwt-session/src/utilities/mail"
@@ -209,8 +210,6 @@ func SinUpWithSession(c *fiber.Ctx) error {
 		})
 	}
 
-	logger.Info.Printf("create a new user\n")
-
 	user = models.User{
 		ID:        uuid.New().String(),
 		Name:      body.Name,
@@ -231,11 +230,39 @@ func SinUpWithSession(c *fiber.Ctx) error {
 	browser := c.Get("User-Agent")
 	ip := c.IP()
 
-	sessionId, jwt, err := jwt.GenerateJwtSession(jwt.GenerateJwtSessionProps{
-		UserId:  userCreated.ID,
-		Browser: &browser,
-		IP:      &ip,
-	})
+	sessionExpiresAt, err := date.GenerateFutureDate(1, "days")
+	if err != nil {
+		logger.Error.Printf("error when generate expiration data to session. error: %s \n", err.Error())
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"message": "error interno no servidor ao gerar a data de expiração da sessão",
+			"error":   err.Error(),
+		})
+	}
+
+	sessionRepository := repositories.NewSessionRepository(db)
+	session := models.Session{
+		ID:        uuid.New().String(),
+		UserID:    user.ID,
+		Browser:   &browser,
+		IP:        &ip,
+		CreatedAt: time.Now(),
+		ExpiresAt: sessionExpiresAt,
+	}
+
+	sessionCreated, err := sessionRepository.Create(&session)
+
+	jwt, err := jwt.GenerateJwt(session.ID)
+	if err != nil {
+		logger.Error.Printf("internal server error when generate jwt. error: %s", err.Error())
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"message": "erro interno no servidor ao tentar gerar o token de acesso",
+			"error":   err.Error(),
+		})
+	}
+
+	if err != nil {
+		logger.Error.Printf("internal server error when save session in the database. error: %s")
+	}
 
 	if err != nil {
 		logger.Error.Printf("Error when generate session. err: ", err.Error())
@@ -256,10 +283,10 @@ func SinUpWithSession(c *fiber.Ctx) error {
 		"message": "usuário cadastrado com sucesso",
 		"user":    userCreated,
 		"access_token": fiber.Map{
-			"jwt":        jwt,
-			"expires":    "devo pegar das envs, dps eu faço isso",
-			"session_id": sessionId,
+			"jwt":     jwt,
+			"expires": "devo pegar das envs, dps eu faço isso",
 		},
+		"session": sessionCreated,
 	})
 }
 
@@ -312,12 +339,36 @@ func SignInWithSession(c *fiber.Ctx) error {
 	browser := c.Get("User-Agent")
 	ip := c.IP()
 
-	sessionId, jwt, err := jwt.GenerateJwtSession(jwt.GenerateJwtSessionProps{
-		UserId:  user.ID,
-		Browser: &browser,
-		IP:      &ip,
-	})
+	sessionRepository := repositories.NewSessionRepository(db)
 
+	sessionExpiresAt, err := date.GenerateFutureDate(1, "days")
+	if err != nil {
+		logger.Error.Printf("error when generate expiration data to session. error: %s \n", err.Error())
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"message": "error interno no servidor ao gerar a data de expiração da sessão",
+			"error":   err.Error(),
+		})
+	}
+
+	session := models.Session{
+		ID:        uuid.New().String(),
+		UserID:    user.ID,
+		Browser:   &browser,
+		IP:        &ip,
+		CreatedAt: time.Now(),
+		ExpiresAt: sessionExpiresAt,
+	}
+
+	sessionCreated, err := sessionRepository.Create(&session)
+
+	jwt, err := jwt.GenerateJwt(session.ID)
+	if err != nil {
+		logger.Error.Printf("internal server error when generate jwt. error: %s", err.Error())
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"message": "erro interno no servidor ao tentar gerar o token de acesso",
+			"error":   err.Error(),
+		})
+	}
 	if err != nil {
 		logger.Error.Printf("internal server error when generate session to user. err %s", err.Error())
 		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
@@ -332,7 +383,7 @@ func SignInWithSession(c *fiber.Ctx) error {
 		"access_token": fiber.Map{
 			"jwt":        jwt,
 			"expires_in": "depois eu faço isso...",
-			"session_id": sessionId,
 		},
+		"session": sessionCreated,
 	})
 }

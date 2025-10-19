@@ -158,6 +158,61 @@ func ChangePasswordRequestRecovery(c *fiber.Ctx) error {
 		})
 	}
 
+	recoveryRepository := repositories.NewRecoveryRepository(db)
+
+	var recovery models.Recovery
+	if err := recoveryRepository.GetByEmail(body.Email, &recovery); err != nil {
+		if err != sql.ErrNoRows {
+			logger.Error.Printf("internal server error whe get recovery data: %s \n", err.Error())
+			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+				"message": "error interno no servidor ao dados de recuperação",
+				"error":   err.Error(),
+			})
+		}
+
+		logger.Warn.Printf("recovery data no found: %s \n", err.Error())
+		return c.Status(http.StatusNotFound).JSON(fiber.Map{
+			"message": "dados de recuperação não encontrado, \n solicite uma recuperação de seha antes",
+			"error":   err.Error(),
+		})
+	}
+
+	if !date.IsNotExpired(recovery.ExpiresAt) {
+		logger.Warn.Printf("recovery code already expires at: %s", recovery.ExpiresAt)
+		return c.Status(http.StatusNotAcceptable).JSON(fiber.Map{
+			"message": "codigo de recuperação já expirou",
+		})
+	}
+
+	logger.Info.Println("check if the code are same")
+	if body.Code != recovery.Code {
+		logger.Warn.Println("the recovery odes are differents. Increasing the attempts.")
+		if err := recoveryRepository.IncrementAttempts(recovery.ID); err != nil {
+			logger.Error.Printf("error when increments attempts in recovery table. error: %s \n", err.Error())
+			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+				"message": "erro interno no servidor ao incrimentar tentativas",
+				"error":   err.Error(),
+			})
+		}
+	}
+
+	if recovery.Attempts > 10 {
+		logger.Warn.Printf("number of attempts exceed, clear recovery data")
+		recoveryRepository.ClearByID(recovery.ID)
+		return c.Status(http.StatusNotAcceptable).JSON(fiber.Map{
+			"message": "número de tentativas excedido gere um novo codigo de recuperação",
+		})
+	}
+
+	logger.Info.Printf("code valid to user %s. Update password", user.Email)
+	if err := userRepository.UpdatePassword(user.ID, body.NewPassword); err != nil {
+		logger.Error.Printf("internal server error when update user password. error: %s \n", err.Error())
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"message": "error interno no servidor ao atulizar a senha do usuário",
+			"error":   err.Error(),
+		})
+	}
+
 	return c.JSON(fiber.Map{
 		"message": "senha alterada com sucesso",
 	})
