@@ -17,8 +17,7 @@ func main() {
 
 	app := fiber.New()
 
-	// 🔹 Servir a documentação HTML diretamente no endpoint /
-	app.Static("/", "./api-doc") // <-- serve index.html da pasta api-doc
+	app.Static("/", "./api-doc")
 
 	logger.Info.Println("connecting in the database")
 	db, err := database.Connect()
@@ -27,8 +26,6 @@ func main() {
 		log.Fatalf("error when connect in the database %s", err.Error())
 	}
 	db.Close()
-
-	database.GetRedisClient()
 
 	logger.Info.Println("setup routes")
 	routes.Setup(app)

@@ -15,24 +15,6 @@ services:
     networks:
       - jwt_network
 
-  redis:
-    container_name: jwt-sessions-redis
-    image: redis:7
-    restart: always
-    ports:
-      - "6379:6379"
-    command:
-      - redis-server
-      - "--appendonly"
-      - "yes"
-      - "--aclfile"
-      - "/data/redis-users.acl"
-    volumes:
-      - redis_data:/data
-      - ./redis-users.acl:/data/redis-users.acl
-    networks:
-      - jwt_network
-
   # Observability
   loki:
     image: grafana/loki:latest
