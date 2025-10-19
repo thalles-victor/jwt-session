@@ -2,6 +2,7 @@ package routes
 
 import (
 	domain_auth "jwt-session/src/domain/auth"
+	"jwt-session/src/utilities/middlewares"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -26,4 +27,12 @@ func Setup(app *fiber.App) {
 	v1SessionAuth := v1Auth.Group("/session")
 	v1SessionAuth.Post("/sign-in", domain_auth.SignInWithSession)
 	v1SessionAuth.Post("/sign-up", domain_auth.SinUpWithSession)
+	v1SessionAuth.Get("/", middlewares.JwtSessionMiddleware, func(c *fiber.Ctx) error {
+		userId := c.Locals("userId").(string)
+
+		return c.JSON(fiber.Map{
+			"message": "sessão válida",
+			"user_id": userId,
+		})
+	})
 }

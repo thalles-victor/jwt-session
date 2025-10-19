@@ -25,13 +25,19 @@ func ParseJWT(tokenAsString string) (string, error) {
 	token, err := jwt.Parse(tokenAsString, func(t *jwt.Token) (interface{}, error) {
 		return config.JWT_SEC_KEY, nil
 	})
+	if err != nil {
+		return "", err
+	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		sub := claims["user"].(string)
+		sub, ok := claims["sub"].(string)
+		if !ok {
+			return "", fmt.Errorf("sub claim not found or invalid")
+		}
 		return sub, nil
 	}
 
-	return "", err
+	return "", fmt.Errorf("invalid token")
 }
 
 type GenerateJwtSessionProps struct {
