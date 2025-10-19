@@ -16,6 +16,7 @@ type Recovery struct {
 	Email     string    `db:"email"`
 	Code      string    `db:"code"`
 	Attempts  int       `db:"attempts"`
+	Expired   bool      `db:"expired"`
 	ExpiresAt time.Time `db:"expires_at"`
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`

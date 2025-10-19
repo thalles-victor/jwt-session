@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS "recoveries" (
     expires_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    expired BOOLEAN DEFAULT FALSE,
     CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id),
     CONSTRAINT fk_email FOREIGN KEY (email) REFERENCES users(email)
 );

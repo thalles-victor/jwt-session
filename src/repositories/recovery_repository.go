@@ -18,7 +18,7 @@ func NewRecoveryRepository(db *sqlx.DB) *RecoveryRepository {
 // GetByUserID busca um recovery pelo ID do usuário
 func (r *RecoveryRepository) GetByUserID(userID string, recovery *models.Recovery) error {
 	return r.db.Get(recovery, `
-		SELECT id, user_id, email, code, attempts, expires_at, created_at, updated_at
+		SELECT id, user_id, email, code, attempts, expires_at, created_at, updated_at, expired
 		FROM recoveries
 		WHERE user_id = $1
 	`, userID)
@@ -27,7 +27,7 @@ func (r *RecoveryRepository) GetByUserID(userID string, recovery *models.Recover
 // GetByEmail busca um recovery pelo email
 func (r *RecoveryRepository) GetByEmail(email string, recovery *models.Recovery) error {
 	return r.db.Get(recovery, `
-		SELECT id, user_id, email, code, attempts, expires_at, created_at, updated_at
+		SELECT id, user_id, email, code, attempts, expires_at, created_at, updated_at, expired
 		FROM recoveries
 		WHERE email = $1
 	`, email)
@@ -36,7 +36,7 @@ func (r *RecoveryRepository) GetByEmail(email string, recovery *models.Recovery)
 // GetByCode busca um recovery pelo código
 func (r *RecoveryRepository) GetByCode(code string, recovery *models.Recovery) error {
 	return r.db.Get(recovery, `
-		SELECT id, user_id, email, code, attempts, expires_at, created_at, updated_at
+		SELECT id, user_id, email, code, attempts, expires_at, created_at, updated_at, expired
 		FROM recoveries
 		WHERE code = $1
 	`, code)
@@ -50,9 +50,9 @@ func (r *RecoveryRepository) Create(recovery *models.Recovery) (models.Recovery,
 	recovery.UpdatedAt = time.Now()
 
 	query := `
-		INSERT INTO recoveries (user_id, email, code, attempts, expires_at, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
-		RETURNING id, user_id, email, code, attempts, expires_at, created_at, updated_at
+		INSERT INTO recoveries (user_id, email, code, attempts, expires_at, created_at, updated_at, expired)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+		RETURNING id, user_id, email, code, attempts, expires_at, created_at, updated_at, expired
 	`
 
 	var createdRecovery models.Recovery
@@ -64,6 +64,7 @@ func (r *RecoveryRepository) Create(recovery *models.Recovery) (models.Recovery,
 		recovery.ExpiresAt,
 		recovery.CreatedAt,
 		recovery.UpdatedAt,
+		recovery.Expired,
 	); err != nil {
 		return models.Recovery{}, err
 	}
@@ -121,15 +122,27 @@ func (r *RecoveryRepository) ClearByEmail(email string) error {
 }
 
 // UpdateRecovery atualiza code, attempts, expires_at e updated_at de um recovery existente
-func (r *RecoveryRepository) UpdateRecovery(id int, code string, attempts int, expiresAt time.Time) error {
+func (r *RecoveryRepository) UpdateRecovery(id int, code string, attempts int, expiresAt time.Time, expired bool) error {
 	_, err := r.db.Exec(`
 		UPDATE recoveries
 		SET code = $1,
 			attempts = $2,
 			expires_at = $3,
+			expired = $4,
 			updated_at = NOW()
-		WHERE id = $4
-	`, code, attempts, expiresAt, id)
+		WHERE id = $5
+	`, code, attempts, expiresAt, expired, id)
 
+	return err
+}
+
+// MarkAsExpired marca um recovery como expirado pelo id
+func (r *RecoveryRepository) MarkAsExpired(id int) error {
+	_, err := r.db.Exec(`
+		UPDATE recoveries
+		SET expired = TRUE,
+			updated_at = NOW()
+		WHERE id = $1
+	`, id)
 	return err
 }

@@ -91,6 +91,7 @@ func RequestRecovery(c *fiber.Ctx) error {
 			ExpiresAt: expiresAt,
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
+			Expired:   false,
 		}); err != nil {
 			logger.Error.Printf("error when save recovery data in the database. error: %s \n", err.Error())
 			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
@@ -100,7 +101,7 @@ func RequestRecovery(c *fiber.Ctx) error {
 		}
 	} else {
 		logger.Info.Println("data of recovery already exist, then update to new data.")
-		if err = recoveryRepository.UpdateRecovery(recovery.ID, recoveryCode, 0, expiresAt); err != nil {
+		if err = recoveryRepository.UpdateRecovery(recovery.ID, recoveryCode, 0, expiresAt, false); err != nil {
 			logger.Error.Printf("intternal server errro when update recovery table %s \n", err.Error())
 			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 				"message": "erro ao atulizar os dados de recuperação",
@@ -127,8 +128,6 @@ func ChangePasswordRequestRecovery(c *fiber.Ctx) error {
 		})
 	}
 
-	email := c.Params("email")
-
 	db, err := database.Connect()
 	if err != nil {
 		logger.Error.Printf("error when connect in the databse. err: %s \n", err.Error())
@@ -141,11 +140,11 @@ func ChangePasswordRequestRecovery(c *fiber.Ctx) error {
 
 	userRepository := repositories.NewUserRepository(db)
 
-	logger.Info.Printf("check if user with email %s exist", email)
+	logger.Info.Printf("check if user with email %s exist", body.Email)
 	var user models.User
-	if err = userRepository.GetByEmail(email, &user); err != nil {
+	if err = userRepository.GetByEmail(body.Email, &user); err != nil {
 		if err != sql.ErrNoRows {
-			logger.Warn.Printf("user with email %s un registered. \n", email)
+			logger.Warn.Printf("user with email %s un registered. \n", body.Email)
 			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
 				"message": "error interno no servidor ao buscar usuário",
 				"error":   err.Error(),
@@ -154,7 +153,7 @@ func ChangePasswordRequestRecovery(c *fiber.Ctx) error {
 
 		logger.Error.Printf("errro when get user from database. error: %s \n", err.Error())
 		return c.Status(http.StatusNotFound).JSON(fiber.Map{
-			"message": fmt.Sprintf("usuário com email %s não foi cadastrado", email),
+			"message": fmt.Sprintf("usuário com email %s não foi cadastrado", body.Email),
 		})
 	}
 
@@ -177,7 +176,28 @@ func ChangePasswordRequestRecovery(c *fiber.Ctx) error {
 		})
 	}
 
+	if recovery.Expired {
+		logger.Warn.Printf("recovery code already expires")
+		return c.Status(http.StatusNotAcceptable).JSON(fiber.Map{
+			"message": "codigo de recuperação já expirou por tentativa ou data, gere um novo",
+		})
+	}
+
+	if recovery.Attempts > 10 {
+		logger.Warn.Printf("number of attempts exceed, clear recovery data")
+		if err = recoveryRepository.MarkAsExpired(recovery.ID); err != nil {
+			logger.Error.Printf("internal server error when make make as expired. error", err.Error())
+			return c.Status(http.StatusNotAcceptable).JSON(fiber.Map{
+				"message": "erro interno no servidor ao expierar o token",
+			})
+		}
+		return c.Status(http.StatusNotAcceptable).JSON(fiber.Map{
+			"message": "número de tentativas excedido gere um novo codigo de recuperação",
+		})
+	}
+
 	if !date.IsNotExpired(recovery.ExpiresAt) {
+		recoveryRepository.MarkAsExpired(recovery.ID)
 		logger.Warn.Printf("recovery code already expires at: %s", recovery.ExpiresAt)
 		return c.Status(http.StatusNotAcceptable).JSON(fiber.Map{
 			"message": "codigo de recuperação já expirou",
@@ -186,21 +206,17 @@ func ChangePasswordRequestRecovery(c *fiber.Ctx) error {
 
 	logger.Info.Println("check if the code are same")
 	if body.Code != recovery.Code {
-		logger.Warn.Println("the recovery odes are differents. Increasing the attempts.")
+		logger.Warn.Println("the recovery are differents. Increasing the attempts.")
 		if err := recoveryRepository.IncrementAttempts(recovery.ID); err != nil {
 			logger.Error.Printf("error when increments attempts in recovery table. error: %s \n", err.Error())
-			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			return c.Status(http.StatusNotAcceptable).JSON(fiber.Map{
 				"message": "erro interno no servidor ao incrimentar tentativas",
 				"error":   err.Error(),
 			})
 		}
-	}
 
-	if recovery.Attempts > 10 {
-		logger.Warn.Printf("number of attempts exceed, clear recovery data")
-		recoveryRepository.ClearByID(recovery.ID)
-		return c.Status(http.StatusNotAcceptable).JSON(fiber.Map{
-			"message": "número de tentativas excedido gere um novo codigo de recuperação",
+		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
+			"message": fmt.Sprintf("o codigo informado é inválido, restam %d tentativas", 10-recovery.Attempts+1),
 		})
 	}
 
